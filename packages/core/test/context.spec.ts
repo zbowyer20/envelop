@@ -22,7 +22,7 @@ describe('contextFactory', () => {
   it('Should set initial `createProxy` arguments as initial context', async () => {
     const spiedPlugin = createSpiedPlugin();
     const teskit = createTestkit([spiedPlugin.plugin], schema);
-    await teskit.execute(query, { test: true });
+    await teskit.execute(query, {}, { test: true });
     expect(spiedPlugin.spies.beforeContextBuilding).toHaveBeenCalledTimes(1);
     expect(spiedPlugin.spies.beforeContextBuilding).toHaveBeenCalledWith({
       context: expect.objectContaining({

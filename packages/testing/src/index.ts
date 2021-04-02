@@ -48,7 +48,7 @@ export function createTestkit(
   pluginsOrEnvelop: Envelop | Plugin[],
   schema?: GraphQLSchema
 ): {
-  execute: (operation: DocumentNode | string, initialContext?: any) => Promise<ExecutionResult<any>>;
+  execute: (operation: DocumentNode | string, variables?: any, initialContext?: any) => Promise<ExecutionResult<any>>;
   replaceSchema: (schema: GraphQLSchema) => void;
   wait: (ms: number) => Promise<void>;
 } {
@@ -70,13 +70,14 @@ export function createTestkit(
   return {
     wait: ms => new Promise(resolve => setTimeout(resolve, ms)),
     replaceSchema,
-    execute: async (operation, initialContext = null) => {
+    execute: async (operation, rawVariables = {}, initialContext = null) => {
       const request = {
         headers: {},
         method: 'POST',
         query: '',
         body: {
           query: typeof operation === 'string' ? operation : print(operation),
+          variables: rawVariables,
         },
       };
       const proxy = initRequest();

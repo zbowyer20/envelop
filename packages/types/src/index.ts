@@ -53,6 +53,7 @@ export interface Plugin<PluginContext = DefaultContext> {
   onExecute?: (options: {
     executeFn: typeof execute;
     args: ExecutionArgs;
+    setVariables: (newVariables: ExecutionArgs['variableValues']) => void;
     setExecuteFn: (newExecute: typeof execute) => void;
     extendContext: (contextExtension: Partial<PluginContext>) => void;
   }) => void | OnExecuteHookResult;

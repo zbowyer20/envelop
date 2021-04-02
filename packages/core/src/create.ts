@@ -296,9 +296,13 @@ export function envelop(options: { plugins: Plugin[]; extends?: Envelop[]; initi
 
     const afterCalls: ((options: { result: ExecutionResult; setResult: (newResult: ExecutionResult) => void }) => void)[] = [];
     let context = args.contextValue;
+    let variables = args.variableValues;
 
     for (const plugin of beforeExecuteCalls) {
       const after = plugin.onExecute({
+        setVariables: newVariables => {
+          variables = newVariables;
+        },
         executeFn,
         setExecuteFn: newExecuteFn => {
           executeFn = newExecuteFn;
@@ -333,6 +337,7 @@ export function envelop(options: { plugins: Plugin[]; extends?: Envelop[]; initi
     let result = await executeFn({
       ...args,
       contextValue: context,
+      variableValues: variables,
     });
 
     for (const afterCb of afterCalls) {
