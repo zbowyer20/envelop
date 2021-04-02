@@ -11,6 +11,7 @@ describe('execute', () => {
     expect(spiedPlugin.spies.beforeResolver).toHaveBeenCalledTimes(3);
     expect(spiedPlugin.spies.beforeExecute).toHaveBeenCalledWith({
       executeFn: expect.any(Function),
+      setVariables: expect.any(Function),
       setExecuteFn: expect.any(Function),
       extendContext: expect.any(Function),
       args: {
@@ -20,7 +21,7 @@ describe('execute', () => {
         operationName: undefined,
         fieldResolver: undefined,
         typeResolver: undefined,
-        variableValues: undefined,
+        variableValues: {},
         document: expect.objectContaining({
           definitions: expect.any(Array),
         }),
