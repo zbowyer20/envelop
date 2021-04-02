@@ -52,7 +52,7 @@ describe('contextFactory', () => {
       schema
     );
 
-    await teskit.execute(query, {});
+    await teskit.execute(query, {}, {});
     expect(afterContextSpy).toHaveBeenCalledWith({
       context: {
         test: true,
@@ -106,7 +106,7 @@ describe('contextFactory', () => {
       ],
       schema
     );
-    await teskit.execute(query, {});
+    await teskit.execute(query, {}, {});
     expect(afterContextSpy).toHaveBeenCalledWith({
       context: {
         test: true,
