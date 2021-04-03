@@ -1,44 +1,13 @@
-import { getNamedType, isEnumType, Kind, NamedTypeNode, TypeNode, visit, visitWithTypeInfo } from 'graphql';
+import { getNamedType, isEnumType, visit, visitWithTypeInfo } from 'graphql';
 import { OperationMigration } from './types';
 import { visitResult } from '@graphql-tools/utils';
-
-function unwrap(type: TypeNode): NamedTypeNode {
-  if (type.kind === Kind.LIST_TYPE || type.kind === Kind.NON_NULL_TYPE) {
-    return unwrap(type.type);
-  }
-
-  return type;
-}
-
-function extractFieldValue<R = any>(result: any, path: readonly (string | number)[]) {
-  let setFn = (v: any) => null;
-
-  const value = path.reduce((prev, item) => {
-    if (!prev) {
-      return prev;
-    }
-
-    if (result[item]) {
-      setFn = value => {
-        result[item] = value;
-      };
-
-      return result[item];
-    }
-
-    return undefined;
-  }, result);
-
-  return {
-    value,
-    setFn,
-  };
-}
+import { buildRuleMap, unwrap } from './utils';
 
 export type MigrateEnumRule = { enumName: string; fromName: string; toName: string };
 
 export function migrateEnum(rawRules: MigrateEnumRule | MigrateEnumRule[]): OperationMigration {
   const rules = Array.isArray(rawRules) ? rawRules : [rawRules];
+  const rulesByType = buildRuleMap(rules, 'enumName');
 
   return {
     migrateAst: (document, schema, typeInfo) => {
@@ -86,16 +55,6 @@ export function migrateEnum(rawRules: MigrateEnumRule | MigrateEnumRule[]): Oper
       return { variablesValue: variables };
     },
     migrateResult: (document, result, schema, typeInfo) => {
-      const rulesByType = rules.reduce((prev, rule) => {
-        if (!prev[rule.enumName]) {
-          prev[rule.enumName] = [];
-        }
-
-        prev[rule.enumName].push(rule);
-
-        return prev;
-      }, {});
-
       const modifiedResult = visitResult(
         result,
         {

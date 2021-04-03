@@ -1,11 +1,12 @@
-import { buildSchema, print } from 'graphql';
+import { print } from 'graphql';
 import { createSpiedPlugin, createTestkit } from '@envelop/testing';
 import { useOperationMigration } from '../src';
 import { migrateEnum } from '../src/enum';
 import { makeExecutableSchema } from '@graphql-tools/schema';
 
-describe('useOperationMigration', () => {
+describe('migrateEnum', () => {
   const oldName = 'OLD_VAL';
+  const newName = 'NEW_VAL';
 
   const testSchema = makeExecutableSchema({
     typeDefs: /* GraphQL */ `
@@ -15,13 +16,13 @@ describe('useOperationMigration', () => {
       }
 
       enum Foo {
-        NEW_VAL
+        ${newName}
         OTHER_VAL
       }
     `,
     resolvers: {
       Query: {
-        testValue: () => 'NEW_VAL',
+        testValue: () => newName,
       },
     },
   });
@@ -32,16 +33,16 @@ describe('useOperationMigration', () => {
       [
         spiedPlugin.plugin,
         useOperationMigration({
-          migrations: [migrateEnum({ enumName: 'Foo', fromName: oldName, toName: 'NEW_VAL' })],
+          migrations: [migrateEnum({ enumName: 'Foo', fromName: oldName, toName: newName })],
         }),
       ],
       testSchema
     );
 
-    const result = await testInstance.execute(`query test { foo(v: OLD_VAL) }`);
+    const result = await testInstance.execute(`query test { foo(v: ${oldName}) }`);
     expect(result.errors).toBeUndefined();
     const executeDocument = (spiedPlugin.spies.beforeExecute.mock.calls[0] as any)[0]['args']['document'];
-    expect(print(executeDocument)).toContain('NEW_VAL');
+    expect(print(executeDocument)).toContain(newName);
     expect(print(executeDocument)).not.toContain(oldName);
   });
 
@@ -51,7 +52,7 @@ describe('useOperationMigration', () => {
       [
         spiedPlugin.plugin,
         useOperationMigration({
-          migrations: [migrateEnum({ enumName: 'Foo', fromName: oldName, toName: 'NEW_VAL' })],
+          migrations: [migrateEnum({ enumName: 'Foo', fromName: oldName, toName: newName })],
         }),
       ],
       testSchema
@@ -60,7 +61,7 @@ describe('useOperationMigration', () => {
     const result = await testInstance.execute(`query test($v: Foo!) { foo(v: $v) }`, { v: oldName });
     expect(result.errors).toBeUndefined();
     const variableValues = (spiedPlugin.spies.beforeExecute.mock.calls[0] as any)[0]['args']['variableValues'];
-    expect(variableValues.v).toBe('NEW_VAL');
+    expect(variableValues.v).toBe(newName);
   });
 
   it('Should migrate enum value correctly at the level of the result', async () => {
@@ -69,7 +70,7 @@ describe('useOperationMigration', () => {
       [
         spiedPlugin.plugin,
         useOperationMigration({
-          migrations: [migrateEnum({ enumName: 'Foo', fromName: oldName, toName: 'NEW_VAL' })],
+          migrations: [migrateEnum({ enumName: 'Foo', fromName: oldName, toName: newName })],
         }),
       ],
       testSchema
