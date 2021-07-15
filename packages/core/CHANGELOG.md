@@ -1,5 +1,15 @@
 # @envelop/core
 
+## 0.3.2
+
+### Patch Changes
+
+- 28ad742: Cleanup for some traces related to the tracedOrchestrator
+- 28ad742: Improve TypeScript types
+- 28ad742: Improve runtime performance by reducing calls to prepareSchema
+- Updated dependencies [28ad742]
+  - @envelop/types@0.2.2
+
 ## 0.3.1
 
 ### Patch Changes
